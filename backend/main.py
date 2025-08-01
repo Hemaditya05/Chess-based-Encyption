@@ -4,7 +4,7 @@ from fastapi import FastAPI, Form, File, UploadFile, HTTPException
 from fastapi.responses import StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
 
-from .chessperm import derive_master_key
+from .chessperm import derive_master_key, derive_master_key_from_password
 from .kyber_kem import generate_keypair, encapsulate, decapsulate
 from .symcrypto import encrypt_message, decrypt_message
 from .stego import embed_data_in_image, extract_data_from_image
@@ -18,12 +18,26 @@ TMP   = os.path.join(BASE, "tmp")
 os.makedirs(TMP, exist_ok=True)
 
 @app.post("/api/encrypt")
-async def encrypt(pgn: str = Form(...), message: str = Form(...)):
+async def encrypt(
+    input_type: str = Form(...),
+    pgn: str = Form(None),
+    password: str = Form(None),
+    message: str = Form(...)
+):
     print("\n--- ENCRYPTION REQUEST ---")
+    print(f"Input type: {input_type}")
     print(f"PGN: {pgn}")
+    print(f"Password: {password}")
     print(f"Message: {message}")
     # 1) ChessPerm → master key
-    mk = derive_master_key(pgn)
+    if input_type == 'password':
+        if not password:
+            raise HTTPException(400, "Password is required for password input type")
+        mk = derive_master_key_from_password(password)
+    else:
+        if not pgn:
+            raise HTTPException(400, "PGN is required for PGN input type")
+        mk = derive_master_key(pgn)
     print(f"Master key (hex): {mk.hex()}")
     print(f"Master key length: {len(mk)} bytes")
 
@@ -73,10 +87,14 @@ async def encrypt(pgn: str = Form(...), message: str = Form(...)):
 async def decrypt(
     file: UploadFile = File(...),
     private_key: str   = Form(...),
-    pgn: str           = Form(...)
+    input_type: str    = Form(...),
+    pgn: str           = Form(None),
+    password: str      = Form(None)
 ):
     print("\n--- DECRYPTION REQUEST ---")
+    print(f"Input type: {input_type}")
     print(f"PGN: {pgn}")
+    print(f"Password: {password}")
     print(f"Private key (truncated): {private_key[:32]}... (len={len(private_key)})")
     try:
         # 1) Handle file upload - could be ZIP or PNG
@@ -134,8 +152,14 @@ async def decrypt(
         except Exception as e:
             print(f"KEM decapsulation failed: {e}")
             raise HTTPException(400, f"KEM decapsulation failed: {str(e)}")
-            
-        mk = derive_master_key(pgn)
+        if input_type == 'password':
+            if not password:
+                raise HTTPException(400, "Password is required for password input type")
+            mk = derive_master_key_from_password(password)
+        else:
+            if not pgn:
+                raise HTTPException(400, "PGN is required for PGN input type")
+            mk = derive_master_key(pgn)
         if len(mk) < len(shared):
             mk += b'\x00' * (len(shared) - len(mk))
         key = bytes(a ^ b for a, b in zip(shared, mk[:len(shared)]))
