@@ -1,5 +1,4 @@
 // src/App.tsx
-import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, useNavigate } from 'react-router-dom';
 import EncryptApp from './EncryptApp';
 import DecryptApp from './DecryptApp';
