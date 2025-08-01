@@ -1,0 +1,134 @@
+CHESSPERM SECURITY TEST REPORT
+============================================================
+Generated: 2025-08-01 22:49:06
+
+SUMMARY:
+Total tests: 5
+Passed: 0
+Failed: 5
+Success rate: 0.0%
+Total duration: 1.55 seconds
+
+DETAILED RESULTS:
+Collision Test: FAIL (0.27s)
+Output:
+Running collision test with 10000 PGNs...
+
+Error:
+Traceback (most recent call last):
+  File "E:\Chess-based Encryption\chess-ui\test_scripts\collision_test.py", line 72, in <module>
+    collision_test()
+    ~~~~~~~~~~~~~~^^
+  File "E:\Chess-based Encryption\chess-ui\test_scripts\collision_test.py", line 46, in collision_test
+    for i, pgn in enumerate(generate_random_pgns(n, depth=12)):
+                            ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "E:\Chess-based Encryption\chess-ui\test_scripts\collision_test.py", line 31, in generate_random_pgns
+    moves.append(game.san(move))
+                 ~~~~~~~~^^^^^^
+  File "C:\Users\Hemaditya\AppData\Local\Programs\Python\Python313\Lib\site-packages\chess\__init__.py", line 2986, in san
+    return self._algebraic(move)
+           ~~~~~~~~~~~~~~~^^^^^^
+  File "C:\Users\Hemaditya\AppData\Local\Programs\Python\Python313\Lib\site-packages\chess\__init__.py", line 2999, in _algebraic
+    san = self._algebraic_and_push(move, long=long)
+  File "C:\Users\Hemaditya\AppData\Local\Programs\Python\Python313\Lib\site-packages\chess\__init__.py", line 3004, in _algebraic_and_push
+    san = self._algebraic_without_suffix(move, long=long)
+  File "C:\Users\Hemaditya\AppData\Local\Programs\Python\Python313\Lib\site-packages\chess\__init__.py", line 3040, in _algebraic_without_suffix
+    assert piece_type, f"san() and lan() expect move to be legal or null, but got {move} in {self.fen()}"
+           ^^^^^^^^^^
+AssertionError: san() and lan() expect move to be legal or null, but got g1h3 in rnbqkbnr/pppppppp/8/8/8/7N/PPPPPPPP/RNBQKB1R b KQkq - 1 1
+
+----------------------------------------
+Avalanche Test: FAIL (0.21s)
+Output:
+Running avalanche test...
+
+Error:
+Traceback (most recent call last):
+  File "E:\Chess-based Encryption\chess-ui\test_scripts\avalanche_test.py", line 125, in <module>
+    avalanche_test()
+    ~~~~~~~~~~~~~~^^
+  File "E:\Chess-based Encryption\chess-ui\test_scripts\avalanche_test.py", line 50, in avalanche_test
+    variations = generate_similar_pgns(base_pgn, 50)
+  File "E:\Chess-based Encryption\chess-ui\test_scripts\avalanche_test.py", line 21, in generate_similar_pgns
+    base_game.set_pgn(base_pgn)
+    ^^^^^^^^^^^^^^^^^
+AttributeError: 'Board' object has no attribute 'set_pgn'. Did you mean: 'set_fen'?
+
+----------------------------------------
+Timing Analysis: FAIL (0.24s)
+Output:
+Running timing analysis with 100 tests...
+
+Error:
+Traceback (most recent call last):
+  File "E:\Chess-based Encryption\chess-ui\test_scripts\timing.py", line 174, in <module>
+    timing_analysis(100)
+    ~~~~~~~~~~~~~~~^^^^^
+  File "E:\Chess-based Encryption\chess-ui\test_scripts\timing.py", line 44, in timing_analysis
+    pgns = generate_random_pgns(num_tests, depth=12)
+  File "E:\Chess-based Encryption\chess-ui\test_scripts\timing.py", line 32, in generate_random_pgns
+    moves.append(game.san(move))
+                 ~~~~~~~~^^^^^^
+  File "C:\Users\Hemaditya\AppData\Local\Programs\Python\Python313\Lib\site-packages\chess\__init__.py", line 2986, in san
+    return self._algebraic(move)
+           ~~~~~~~~~~~~~~~^^^^^^
+  File "C:\Users\Hemaditya\AppData\Local\Programs\Python\Python313\Lib\site-packages\chess\__init__.py", line 2999, in _algebraic
+    san = self._algebraic_and_push(move, long=long)
+  File "C:\Users\Hemaditya\AppData\Local\Programs\Python\Python313\Lib\site-packages\chess\__init__.py", line 3004, in _algebraic_and_push
+    san = self._algebraic_without_suffix(move, long=long)
+  File "C:\Users\Hemaditya\AppData\Local\Programs\Python\Python313\Lib\site-packages\chess\__init__.py", line 3040, in _algebraic_without_suffix
+    assert piece_type, f"san() and lan() expect move to be legal or null, but got {move} in {self.fen()}"
+           ^^^^^^^^^^
+AssertionError: san() and lan() expect move to be legal or null, but got a2a3 in rnbqkbnr/pppppppp/8/8/8/P7/1PPPPPPP/RNBQKBNR b KQkq - 0 1
+
+----------------------------------------
+Differential Propagation: FAIL (0.62s)
+Output:
+Testing single-bit propagation...
+
+Testing input: 1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Ba4 Nf6...
+Average bit difference per single-bit change: 51.77 bits
+Percentage of bits changed: 20.22%
+
+Error:
+Traceback (most recent call last):
+  File "E:\Chess-based Encryption\chess-ui\test_scripts\diff_probe.py", line 158, in <module>
+    test_single_bit_propagation()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "E:\Chess-based Encryption\chess-ui\test_scripts\diff_probe.py", line 64, in test_single_bit_propagation
+    print("\u2717 Poor differential propagation")
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Hemaditya\AppData\Local\Programs\Python\Python313\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode character '\u2717' in position 0: character maps to <undefined>
+
+----------------------------------------
+Performance Benchmark: FAIL (0.21s)
+Output:
+Benchmarking ChessPerm key derivation...
+Number of tests: 1000
+
+Error:
+Traceback (most recent call last):
+  File "E:\Chess-based Encryption\chess-ui\test_scripts\bench.py", line 146, in <module>
+    benchmark_throughput(1000)
+    ~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "E:\Chess-based Encryption\chess-ui\test_scripts\bench.py", line 45, in benchmark_throughput
+    pgns = generate_random_pgns(num_tests, depth=12)
+  File "E:\Chess-based Encryption\chess-ui\test_scripts\bench.py", line 31, in generate_random_pgns
+    moves.append(game.san(move))
+                 ~~~~~~~~^^^^^^
+  File "C:\Users\Hemaditya\AppData\Local\Programs\Python\Python313\Lib\site-packages\chess\__init__.py", line 2986, in san
+    return self._algebraic(move)
+           ~~~~~~~~~~~~~~~^^^^^^
+  File "C:\Users\Hemaditya\AppData\Local\Programs\Python\Python313\Lib\site-packages\chess\__init__.py", line 2999, in _algebraic
+    san = self._algebraic_and_push(move, long=long)
+  File "C:\Users\Hemaditya\AppData\Local\Programs\Python\Python313\Lib\site-packages\chess\__init__.py", line 3004, in _algebraic_and_push
+    san = self._algebraic_without_suffix(move, long=long)
+  File "C:\Users\Hemaditya\AppData\Local\Programs\Python\Python313\Lib\site-packages\chess\__init__.py", line 3040, in _algebraic_without_suffix
+    assert piece_type, f"san() and lan() expect move to be legal or null, but got {move} in {self.fen()}"
+           ^^^^^^^^^^
+AssertionError: san() and lan() expect move to be legal or null, but got g2g4 in rnbqkbnr/pppppppp/8/8/6P1/8/PPPPPP1P/RNBQKBNR b KQkq - 0 1
+
+----------------------------------------

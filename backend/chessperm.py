@@ -1,224 +1,106 @@
-import io
 import chess
-import math
-import hashlib
+import secrets
 
-# 4-bit S-box for Pawn substitution
-_SBOX = [
-    0x6, 0xB, 0xC, 0x0,
-    0x5, 0x7, 0xA, 0xD,
-    0x1, 0xF, 0x3, 0x9,
-    0xE, 0x8, 0x4, 0x2,
-]
+def _password_to_bits(password: str, salt: bytes = b'') -> list[int]:
+    combined = password.encode() + salt
+    return [((byte >> i) & 1) for byte in combined for i in reversed(range(8))]
 
-def _pgn_to_bits(pgn: str) -> list[int]:
-    bits = []
+def _get_chunk_val(bits: list[int], index: int, chunk_size: int = 6) -> int:
+    start = (index * chunk_size) % len(bits)
+    chunk = bits[start:start + chunk_size]
+    if len(chunk) < chunk_size:
+        chunk += bits[:chunk_size - len(chunk)]
+    return int(''.join(str(b) for b in chunk), 2)
+
+def _simulate_chess(bits: list[int], plies: int = 100, prioritize_irreversible=True) -> chess.Board:
     board = chess.Board()
-    for token in pgn.replace('\n', ' ').split(' '):
-        token = token.strip()
-        if not token or token.endswith('.'):
-            continue
-        try:
-            move = board.parse_san(token)
-        except ValueError:
-            continue
-        board.push(move)
-        uci = move.uci()
-        coords = [
-            ord(uci[0]) - ord('a'),
-            ord(uci[1]) - ord('1'),
-            ord(uci[2]) - ord('a'),
-            ord(uci[3]) - ord('1'),
-        ]
-        for coord in coords:
-            for b in (2, 1, 0):
-                bits.append((coord >> b) & 1)
-    return bits
+    for i in range(plies):
+        legal_moves = list(board.legal_moves)
+        if not legal_moves:
+            break
 
-def _pad_bits(bits: list[int], block_size: int = 256) -> list[list[int]]:
-    rem = len(bits) % block_size
-    if rem:
-        bits += [0] * (block_size - rem)
-    return [bits[i:i+block_size] for i in range(0, len(bits), block_size)]
+        # --- Prioritize irreversible moves (captures, promotions, castling loss) ---
+        irreversible = []
+        for move in legal_moves:
+            if board.is_capture(move) or board.is_en_passant(move) or move.promotion:
+                irreversible.append(move)
+            elif board.is_castling(move):
+                irreversible.append(move)
 
-def _rotate(arr: list[int], n: int) -> list[int]:
-    n %= len(arr)
-    return arr[n:] + arr[:n]
+        use_irreversible = (prioritize_irreversible and (i % 10 < 7))  # 70% of the time
 
-def _knight_jump(block: list[int]) -> list[int]:
-    size = int(math.isqrt(len(block)))
-    out = block.copy()
-    for idx in range(len(block)):
-        r, c = divmod(idx, size)
-        r2 = (r + 2) % size
-        c2 = (c + 1) % size
-        idx2 = r2 * size + c2
-        out[idx], out[idx2] = block[idx2], block[idx]
-    return out
+        move_pool = irreversible if use_irreversible and irreversible else legal_moves
+        val = _get_chunk_val(bits, i)
+        chosen = move_pool[val % len(move_pool)]
+        board.push(chosen)
+    return board
 
-def _pawn_substitution(block: list[int]) -> list[int]:
-    out = []
-    for i in range(0, len(block), 4):
-        nibble = (block[i] << 3) | (block[i+1] << 2) | (block[i+2] << 1) | block[i+3]
-        sub = _SBOX[nibble]
-        for b in (3, 2, 1, 0):
-            out.append((sub >> b) & 1)
-    return out
-
-def _rook_diffusion(block: list[int]) -> list[int]:
-    size = int(math.isqrt(len(block)))
-    out = block.copy()
-    # rows
-    for r in range(size):
-        start = r * size
-        row = out[start:start+size]
-        shift = sum(row) % size
-        out[start:start+size] = _rotate(row, shift)
-    # columns
-    for c in range(size):
-        col = [out[r*size + c] for r in range(size)]
-        shift = sum(col) % size
-        rotated = _rotate(col, shift)
-        for r in range(size):
-            out[r*size + c] = rotated[r]
-    return out
-
-def _promotion_nonlinearity(block: list[int], round_idx: int) -> list[int]:
-    idx = round_idx % len(block)
-    block[idx] ^= 1
-    return block
-
-def _process_block(block: list[int]) -> list[int]:
-    b = block.copy()
-    for rnd in range(16):
-        b = _knight_jump(b)
-        b = _pawn_substitution(b)
-        b = _rook_diffusion(b)
-        b = _promotion_nonlinearity(b, rnd)
-    return b
-
-def derive_master_key(pgn: str) -> bytes:
-    bits = _pgn_to_bits(pgn)
-    if not bits:
-        # fallback to raw ASCII bits
-        for byte in pgn.encode():
-            for b in range(7, -1, -1):
-                bits.append((byte >> b) & 1)
-
-    blocks = _pad_bits(bits)
-    processed = [_process_block(b) for b in blocks]
-
-    # XOR-fold multiple blocks
-    final = processed[0]
-    for blk in processed[1:]:
-        final = [x ^ y for x, y in zip(final, blk)]
-
-    # pack into 32 bytes
-    return bytes(
-        int(''.join(str(bit) for bit in final[i:i+8]), 2)
-        for i in range(0, 256, 8)
-    )
-
-def derive_master_key_from_password(password: str) -> bytes:
-    """
-    Derive a master key from a password using the same block cipher logic as PGN.
-    The password is converted to bits (ASCII), padded, and processed.
-    """
+def _board_to_master_key(board: chess.Board) -> bytes:
     bits = []
-    for byte in password.encode():
-        for b in range(7, -1, -1):
-            bits.append((byte >> b) & 1)
-    blocks = _pad_bits(bits)
-    processed = [_process_block(b) for b in blocks]
-    final = processed[0]
-    for blk in processed[1:]:
-        final = [x ^ y for x, y in zip(final, blk)]
-    return bytes(
-        int(''.join(str(bit) for bit in final[i:i+8]), 2)
-        for i in range(0, 256, 8)
-    )
 
-def _fen_to_bits(fen: str) -> list[int]:
-    # Encode FEN string as bits (ASCII)
-    bits = []
-    for byte in fen.encode():
-        for b in range(7, -1, -1):
-            bits.append((byte >> b) & 1)
-    return bits
+    # 1. Occupied squares: 64-bit map
+    bits.extend([1 if board.piece_at(i) else 0 for i in chess.SQUARES])
 
-def _chess_features_to_bits(board: chess.Board) -> list[int]:
-    # Piece counts
-    piece_counts = [board.piece_map().values().count(piece) if hasattr(board.piece_map().values(), 'count') else list(board.piece_map().values()).count(piece) for piece in [chess.PAWN, chess.KNIGHT, chess.BISHOP, chess.ROOK, chess.QUEEN, chess.KING]]
-    bits = []
-    for count in piece_counts:
-        for b in range(4, -1, -1):
-            bits.append((count >> b) & 1)
-    # Castling rights
-    for flag in [board.has_kingside_castling_rights(chess.WHITE), board.has_queenside_castling_rights(chess.WHITE), board.has_kingside_castling_rights(chess.BLACK), board.has_queenside_castling_rights(chess.BLACK)]:
-        bits.append(int(flag))
-    # En passant square
+    # 2. Encode each piece (type + color)
+    for sq in chess.SQUARES:
+        piece = board.piece_at(sq)
+        if piece:
+            color_bit = 0 if piece.color == chess.WHITE else 1
+            type_code = piece.piece_type  # 1–6
+            val = (color_bit << 3) | (type_code & 0b111)
+            bits.extend([(val >> b) & 1 for b in reversed(range(4))])
+
+    # 3. Turn (1 bit)
+    bits.append(0 if board.turn == chess.WHITE else 1)
+
+    # 4. Castling rights (4 bits)
+    bits += [int(board.has_kingside_castling_rights(c)) for c in [chess.WHITE, chess.BLACK]]
+    bits += [int(board.has_queenside_castling_rights(c)) for c in [chess.WHITE, chess.BLACK]]
+
+    # 5. En passant square (6 bits)
     ep = board.ep_square if board.ep_square is not None else 0
-    for b in range(5, -1, -1):
-        bits.append((ep >> b) & 1)
-    return bits
+    bits.extend([(ep >> b) & 1 for b in reversed(range(6))])
 
-def derive_master_key_robust(pgn: str, salt: bytes = b"", iterations: int = 1000) -> bytes:
+    # 6. Halfmove clock (7 bits)
+    hmc = min(board.halfmove_clock, 127)
+    bits.extend([(hmc >> b) & 1 for b in reversed(range(7))])
+
+    # Pad to 256 bits
+    while len(bits) < 256:
+        bits.extend(bits[:256 - len(bits)])
+
+    return bytes(int(''.join(str(b) for b in bits[i:i+8]), 2) for i in range(0, 256, 8))
+
+# === Public API ===
+
+def derive_master_key(pgn: str, salt: bytes = b'', plies: int = 100) -> bytes:
     board = chess.Board()
-    for token in pgn.replace('\n', ' ').split(' '):
+    bits = []
+
+    for token in pgn.replace('\n', ' ').split():
         token = token.strip()
         if not token or token.endswith('.'):
             continue
         try:
             move = board.parse_san(token)
+            board.push(move)
+            uci = move.uci()
+            coords = [ord(uci[0]) - ord('a'), ord(uci[1]) - ord('1'),
+                      ord(uci[2]) - ord('a'), ord(uci[3]) - ord('1')]
+            for c in coords:
+                bits.extend([(c >> b) & 1 for b in reversed(range(3))])
         except ValueError:
             continue
-        board.push(move)
-    # Mix PGN bits, FEN bits, and chess features
-    bits = _pgn_to_bits(pgn)
-    bits += _fen_to_bits(board.fen())
-    bits += _chess_features_to_bits(board)
-    # Salt bits
-    salt_bits = []
-    for byte in salt:
-        for b in range(7, -1, -1):
-            salt_bits.append((byte >> b) & 1)
-    # Pad and process
-    blocks = _pad_bits(bits)
-    state = [_process_block(b) for b in blocks]
-    # Iterative mixing
-    for i in range(iterations):
-        for idx, block in enumerate(state):
-            # XOR salt bits in each round
-            block = [x ^ y for x, y in zip(block, salt_bits * (len(block)//len(salt_bits)+1))][:len(block)] if salt_bits else block
-            block = _process_block(block)
-            state[idx] = block
-    # XOR-fold
-    final = state[0]
-    for blk in state[1:]:
-        final = [x ^ y for x, y in zip(final, blk)]
-    # Hash
-    final_bytes = bytes(int(''.join(str(bit) for bit in final[i:i+8]), 2) for i in range(0, 256, 8))
-    return hashlib.sha256(final_bytes).digest()
 
-def derive_master_key_from_password_robust(password: str, salt: bytes = b"", iterations: int = 1000) -> bytes:
-    bits = []
-    for byte in password.encode():
-        for b in range(7, -1, -1):
-            bits.append((byte >> b) & 1)
-    # Salt bits
-    salt_bits = []
-    for byte in salt:
-        for b in range(7, -1, -1):
-            salt_bits.append((byte >> b) & 1)
-    blocks = _pad_bits(bits)
-    state = [_process_block(b) for b in blocks]
-    for i in range(iterations):
-        for idx, block in enumerate(state):
-            block = [x ^ y for x, y in zip(block, salt_bits * (len(block)//len(salt_bits)+1))][:len(block)] if salt_bits else block
-            block = _process_block(block)
-            state[idx] = block
-    final = state[0]
-    for blk in state[1:]:
-        final = [x ^ y for x, y in zip(final, blk)]
-    final_bytes = bytes(int(''.join(str(bit) for bit in final[i:i+8]), 2) for i in range(0, 256, 8))
-    return hashlib.sha256(final_bytes).digest()
+    if not bits:
+        bits = _password_to_bits(pgn)
+    if salt:
+        bits += _password_to_bits("", salt)
+
+    final_board = _simulate_chess(bits, plies)
+    return _board_to_master_key(final_board)
+
+def derive_master_key_from_password(password: str, salt: bytes = b'', plies: int = 100) -> bytes:
+    bits = _password_to_bits(password, salt)
+    final_board = _simulate_chess(bits, plies)
+    return _board_to_master_key(final_board)
