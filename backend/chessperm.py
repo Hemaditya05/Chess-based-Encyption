@@ -1,6 +1,7 @@
 import io
 import chess
 import math
+import hashlib
 
 # 4-bit S-box for Pawn substitution
 _SBOX = [
@@ -117,3 +118,107 @@ def derive_master_key(pgn: str) -> bytes:
         int(''.join(str(bit) for bit in final[i:i+8]), 2)
         for i in range(0, 256, 8)
     )
+
+def derive_master_key_from_password(password: str) -> bytes:
+    """
+    Derive a master key from a password using the same block cipher logic as PGN.
+    The password is converted to bits (ASCII), padded, and processed.
+    """
+    bits = []
+    for byte in password.encode():
+        for b in range(7, -1, -1):
+            bits.append((byte >> b) & 1)
+    blocks = _pad_bits(bits)
+    processed = [_process_block(b) for b in blocks]
+    final = processed[0]
+    for blk in processed[1:]:
+        final = [x ^ y for x, y in zip(final, blk)]
+    return bytes(
+        int(''.join(str(bit) for bit in final[i:i+8]), 2)
+        for i in range(0, 256, 8)
+    )
+
+def _fen_to_bits(fen: str) -> list[int]:
+    # Encode FEN string as bits (ASCII)
+    bits = []
+    for byte in fen.encode():
+        for b in range(7, -1, -1):
+            bits.append((byte >> b) & 1)
+    return bits
+
+def _chess_features_to_bits(board: chess.Board) -> list[int]:
+    # Piece counts
+    piece_counts = [board.piece_map().values().count(piece) if hasattr(board.piece_map().values(), 'count') else list(board.piece_map().values()).count(piece) for piece in [chess.PAWN, chess.KNIGHT, chess.BISHOP, chess.ROOK, chess.QUEEN, chess.KING]]
+    bits = []
+    for count in piece_counts:
+        for b in range(4, -1, -1):
+            bits.append((count >> b) & 1)
+    # Castling rights
+    for flag in [board.has_kingside_castling_rights(chess.WHITE), board.has_queenside_castling_rights(chess.WHITE), board.has_kingside_castling_rights(chess.BLACK), board.has_queenside_castling_rights(chess.BLACK)]:
+        bits.append(int(flag))
+    # En passant square
+    ep = board.ep_square if board.ep_square is not None else 0
+    for b in range(5, -1, -1):
+        bits.append((ep >> b) & 1)
+    return bits
+
+def derive_master_key_robust(pgn: str, salt: bytes = b"", iterations: int = 1000) -> bytes:
+    board = chess.Board()
+    for token in pgn.replace('\n', ' ').split(' '):
+        token = token.strip()
+        if not token or token.endswith('.'):
+            continue
+        try:
+            move = board.parse_san(token)
+        except ValueError:
+            continue
+        board.push(move)
+    # Mix PGN bits, FEN bits, and chess features
+    bits = _pgn_to_bits(pgn)
+    bits += _fen_to_bits(board.fen())
+    bits += _chess_features_to_bits(board)
+    # Salt bits
+    salt_bits = []
+    for byte in salt:
+        for b in range(7, -1, -1):
+            salt_bits.append((byte >> b) & 1)
+    # Pad and process
+    blocks = _pad_bits(bits)
+    state = [_process_block(b) for b in blocks]
+    # Iterative mixing
+    for i in range(iterations):
+        for idx, block in enumerate(state):
+            # XOR salt bits in each round
+            block = [x ^ y for x, y in zip(block, salt_bits * (len(block)//len(salt_bits)+1))][:len(block)] if salt_bits else block
+            block = _process_block(block)
+            state[idx] = block
+    # XOR-fold
+    final = state[0]
+    for blk in state[1:]:
+        final = [x ^ y for x, y in zip(final, blk)]
+    # Hash
+    final_bytes = bytes(int(''.join(str(bit) for bit in final[i:i+8]), 2) for i in range(0, 256, 8))
+    return hashlib.sha256(final_bytes).digest()
+
+def derive_master_key_from_password_robust(password: str, salt: bytes = b"", iterations: int = 1000) -> bytes:
+    bits = []
+    for byte in password.encode():
+        for b in range(7, -1, -1):
+            bits.append((byte >> b) & 1)
+    # Salt bits
+    salt_bits = []
+    for byte in salt:
+        for b in range(7, -1, -1):
+            salt_bits.append((byte >> b) & 1)
+    blocks = _pad_bits(bits)
+    state = [_process_block(b) for b in blocks]
+    for i in range(iterations):
+        for idx, block in enumerate(state):
+            block = [x ^ y for x, y in zip(block, salt_bits * (len(block)//len(salt_bits)+1))][:len(block)] if salt_bits else block
+            block = _process_block(block)
+            state[idx] = block
+    final = state[0]
+    for blk in state[1:]:
+        final = [x ^ y for x, y in zip(final, blk)]
+    final_bytes = bytes(int(''.join(str(bit) for bit in final[i:i+8]), 2) for i in range(0, 256, 8))
+    return hashlib.sha256(final_bytes).digest()

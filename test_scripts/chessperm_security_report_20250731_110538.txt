@@ -1,0 +1,222 @@
+CHESSPERM SECURITY TEST REPORT
+============================================================
+Generated: 2025-07-31 11:05:38
+
+SUMMARY:
+Total tests: 5
+Passed: 0
+Failed: 5
+Success rate: 0.0%
+Total duration: 1.41 seconds
+
+DETAILED RESULTS:
+Collision Test: FAIL (0.25s)
+Output:
+Running collision test with 10000 PGNs...
+
+Error:
+Traceback (most recent call last):
+  File "E:\Chess-based Encryption\chess-ui\test_scripts\collision_test.py", line 72, in <module>
+    collision_test()
+    ~~~~~~~~~~~~~~^^
+  File "E:\Chess-based Encryption\chess-ui\test_scripts\collision_test.py", line 46, in collision_test
+    for i, pgn in enumerate(generate_random_pgns(n, depth=12)):
+                            ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "E:\Chess-based Encryption\chess-ui\test_scripts\collision_test.py", line 31, in generate_random_pgns
+    moves.append(game.san(move))
+                 ~~~~~~~~^^^^^^
+  File "C:\Users\Hemaditya\AppData\Local\Programs\Python\Python313\Lib\site-packages\chess\__init__.py", line 2986, in san
+    return self._algebraic(move)
+           ~~~~~~~~~~~~~~~^^^^^^
+  File "C:\Users\Hemaditya\AppData\Local\Programs\Python\Python313\Lib\site-packages\chess\__init__.py", line 2999, in _algebraic
+    san = self._algebraic_and_push(move, long=long)
+  File "C:\Users\Hemaditya\AppData\Local\Programs\Python\Python313\Lib\site-packages\chess\__init__.py", line 3004, in _algebraic_and_push
+    san = self._algebraic_without_suffix(move, long=long)
+  File "C:\Users\Hemaditya\AppData\Local\Programs\Python\Python313\Lib\site-packages\chess\__init__.py", line 3040, in _algebraic_without_suffix
+    assert piece_type, f"san() and lan() expect move to be legal or null, but got {move} in {self.fen()}"
+           ^^^^^^^^^^
+AssertionError: san() and lan() expect move to be legal or null, but got f2f3 in rnbqkbnr/pppppppp/8/8/8/5P2/PPPPP1PP/RNBQKBNR b KQkq - 0 1
+
+----------------------------------------
+Avalanche Test: FAIL (0.23s)
+Output:
+Running avalanche test...
+
+Error:
+Traceback (most recent call last):
+  File "E:\Chess-based Encryption\chess-ui\test_scripts\avalanche_test.py", line 125, in <module>
+    avalanche_test()
+    ~~~~~~~~~~~~~~^^
+  File "E:\Chess-based Encryption\chess-ui\test_scripts\avalanche_test.py", line 50, in avalanche_test
+    variations = generate_similar_pgns(base_pgn, 50)
+  File "E:\Chess-based Encryption\chess-ui\test_scripts\avalanche_test.py", line 21, in generate_similar_pgns
+    base_game.set_pgn(base_pgn)
+    ^^^^^^^^^^^^^^^^^
+AttributeError: 'Board' object has no attribute 'set_pgn'. Did you mean: 'set_fen'?
+
+----------------------------------------
+Timing Analysis: FAIL (0.25s)
+Output:
+Running timing analysis with 100 tests...
+
+Error:
+Traceback (most recent call last):
+  File "E:\Chess-based Encryption\chess-ui\test_scripts\timing.py", line 174, in <module>
+    timing_analysis(100)
+    ~~~~~~~~~~~~~~~^^^^^
+  File "E:\Chess-based Encryption\chess-ui\test_scripts\timing.py", line 44, in timing_analysis
+    pgns = generate_random_pgns(num_tests, depth=12)
+  File "E:\Chess-based Encryption\chess-ui\test_scripts\timing.py", line 32, in generate_random_pgns
+    moves.append(game.san(move))
+                 ~~~~~~~~^^^^^^
+  File "C:\Users\Hemaditya\AppData\Local\Programs\Python\Python313\Lib\site-packages\chess\__init__.py", line 2986, in san
+    return self._algebraic(move)
+           ~~~~~~~~~~~~~~~^^^^^^
+  File "C:\Users\Hemaditya\AppData\Local\Programs\Python\Python313\Lib\site-packages\chess\__init__.py", line 2999, in _algebraic
+    san = self._algebraic_and_push(move, long=long)
+  File "C:\Users\Hemaditya\AppData\Local\Programs\Python\Python313\Lib\site-packages\chess\__init__.py", line 3004, in _algebraic_and_push
+    san = self._algebraic_without_suffix(move, long=long)
+  File "C:\Users\Hemaditya\AppData\Local\Programs\Python\Python313\Lib\site-packages\chess\__init__.py", line 3040, in _algebraic_without_suffix
+    assert piece_type, f"san() and lan() expect move to be legal or null, but got {move} in {self.fen()}"
+           ^^^^^^^^^^
+AssertionError: san() and lan() expect move to be legal or null, but got h2h4 in rnbqkbnr/pppppppp/8/8/7P/8/PPPPPPP1/RNBQKBNR b KQkq - 0 1
+
+----------------------------------------
+Differential Propagation: FAIL (0.48s)
+Output:
+Testing single-bit propagation...
+
+Testing input: 1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Ba4 Nf6...
+Average bit difference per single-bit change: 92.97 bits
+Percentage of bits changed: 36.32%
+
+Error:
+WARNING:chessperm:Invalid move skipped: 1/
+WARNING:chessperm:Invalid move skipped: 1.!e4
+WARNING:chessperm:Invalid move skipped: e5
+WARNING:chessperm:Invalid move skipped: Bb5
+WARNING:chessperm:Invalid move skipped: a6
+WARNING:chessperm:Invalid move skipped: Ba4
+WARNING:chessperm:Invalid move skipped: Nf6
+WARNING:chessperm:Invalid move skipped: Bb5
+WARNING:chessperm:Invalid move skipped: a6
+WARNING:chessperm:Invalid move skipped: Ba4
+WARNING:chessperm:Invalid move skipped: Nf6
+WARNING:chessperm:Invalid move skipped: e5
+WARNING:chessperm:Invalid move skipped: e5
+WARNING:chessperm:Invalid move skipped: Bb5
+WARNING:chessperm:Invalid move skipped: a6
+WARNING:chessperm:Invalid move skipped: Ba4
+WARNING:chessperm:Invalid move skipped: Nf6
+WARNING:chessperm:Invalid move skipped: e4!e5
+WARNING:chessperm:Invalid move skipped: Bb5
+WARNING:chessperm:Invalid move skipped: a6
+WARNING:chessperm:Invalid move skipped: Ba4
+WARNING:chessperm:Invalid move skipped: Nf6
+WARNING:chessperm:Invalid move skipped: e4
+WARNING:chessperm:Invalid move skipped: Nf3
+WARNING:chessperm:Invalid move skipped: Nf3
+WARNING:chessperm:Invalid move skipped: 2/
+WARNING:chessperm:Invalid move skipped: 2.!Nf3
+WARNING:chessperm:Invalid move skipped: Nc6
+WARNING:chessperm:Invalid move skipped: Of3
+WARNING:chessperm:Invalid move skipped: Nc6
+WARNING:chessperm:Invalid move skipped: Ng3
+WARNING:chessperm:Invalid move skipped: Nc6
+WARNING:chessperm:Invalid move skipped: Nf2
+WARNING:chessperm:Invalid move skipped: Nc6
+WARNING:chessperm:Invalid move skipped: Nf3!Nc6
+WARNING:chessperm:Invalid move skipped: Oc6
+WARNING:chessperm:Invalid move skipped: Bb5
+WARNING:chessperm:Invalid move skipped: Ba4
+WARNING:chessperm:Invalid move skipped: Nf6
+WARNING:chessperm:Invalid move skipped: Nb6
+WARNING:chessperm:Invalid move skipped: Bb5
+WARNING:chessperm:Invalid move skipped: Ba4
+WARNING:chessperm:Invalid move skipped: Nf6
+WARNING:chessperm:Invalid move skipped: Nc7
+WARNING:chessperm:Invalid move skipped: Bb5
+WARNING:chessperm:Invalid move skipped: Ba4
+WARNING:chessperm:Invalid move skipped: Nf6
+WARNING:chessperm:Invalid move skipped: Bb5
+WARNING:chessperm:Invalid move skipped: Ba4
+WARNING:chessperm:Invalid move skipped: Nf6
+WARNING:chessperm:Invalid move skipped: 3/
+WARNING:chessperm:Invalid move skipped: 3.!Bb5
+WARNING:chessperm:Invalid move skipped: a6
+WARNING:chessperm:Invalid move skipped: Ba4
+WARNING:chessperm:Invalid move skipped: Nf6
+WARNING:chessperm:Invalid move skipped: Cb5
+WARNING:chessperm:Invalid move skipped: a6
+WARNING:chessperm:Invalid move skipped: Ba4
+WARNING:chessperm:Invalid move skipped: Nf6
+WARNING:chessperm:Invalid move skipped: Bc5
+WARNING:chessperm:Invalid move skipped: a6
+WARNING:chessperm:Invalid move skipped: Ba4
+WARNING:chessperm:Invalid move skipped: Nf6
+WARNING:chessperm:Invalid move skipped: Bb4
+WARNING:chessperm:Invalid move skipped: a6
+WARNING:chessperm:Invalid move skipped: Ba4
+WARNING:chessperm:Invalid move skipped: Nf6
+WARNING:chessperm:Invalid move skipped: Bb5!a6
+WARNING:chessperm:Invalid move skipped: Ba4
+WARNING:chessperm:Invalid move skipped: Nf6
+WARNING:chessperm:Invalid move skipped: `6
+WARNING:chessperm:Invalid move skipped: Ba4
+WARNING:chessperm:Invalid move skipped: a7
+WARNING:chessperm:Invalid move skipped: Ba4
+WARNING:chessperm:Invalid move skipped: Ba4
+WARNING:chessperm:Invalid move skipped: 4/
+WARNING:chessperm:Invalid move skipped: 4.!Ba4
+WARNING:chessperm:Invalid move skipped: Nf6
+WARNING:chessperm:Invalid move skipped: Ca4
+WARNING:chessperm:Invalid move skipped: Nf6
+WARNING:chessperm:Invalid move skipped: B`4
+WARNING:chessperm:Invalid move skipped: Nf6
+WARNING:chessperm:Invalid move skipped: Ba5
+WARNING:chessperm:Invalid move skipped: Nf6
+WARNING:chessperm:Invalid move skipped: Ba4!Nf6
+WARNING:chessperm:Invalid move skipped: Of6
+WARNING:chessperm:Invalid move skipped: Ng6
+WARNING:chessperm:Invalid move skipped: Nf7
+Traceback (most recent call last):
+  File "E:\Chess-based Encryption\chess-ui\test_scripts\diff_probe.py", line 158, in <module>
+    test_single_bit_propagation()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "E:\Chess-based Encryption\chess-ui\test_scripts\diff_probe.py", line 64, in test_single_bit_propagation
+    print("\u2717 Poor differential propagation")
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Hemaditya\AppData\Local\Programs\Python\Python313\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode character '\u2717' in position 0: character maps to <undefined>
+
+----------------------------------------
+Performance Benchmark: FAIL (0.20s)
+Output:
+Benchmarking ChessPerm key derivation...
+Number of tests: 1000
+
+Error:
+Traceback (most recent call last):
+  File "E:\Chess-based Encryption\chess-ui\test_scripts\bench.py", line 146, in <module>
+    benchmark_throughput(1000)
+    ~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "E:\Chess-based Encryption\chess-ui\test_scripts\bench.py", line 45, in benchmark_throughput
+    pgns = generate_random_pgns(num_tests, depth=12)
+  File "E:\Chess-based Encryption\chess-ui\test_scripts\bench.py", line 31, in generate_random_pgns
+    moves.append(game.san(move))
+                 ~~~~~~~~^^^^^^
+  File "C:\Users\Hemaditya\AppData\Local\Programs\Python\Python313\Lib\site-packages\chess\__init__.py", line 2986, in san
+    return self._algebraic(move)
+           ~~~~~~~~~~~~~~~^^^^^^
+  File "C:\Users\Hemaditya\AppData\Local\Programs\Python\Python313\Lib\site-packages\chess\__init__.py", line 2999, in _algebraic
+    san = self._algebraic_and_push(move, long=long)
+  File "C:\Users\Hemaditya\AppData\Local\Programs\Python\Python313\Lib\site-packages\chess\__init__.py", line 3004, in _algebraic_and_push
+    san = self._algebraic_without_suffix(move, long=long)
+  File "C:\Users\Hemaditya\AppData\Local\Programs\Python\Python313\Lib\site-packages\chess\__init__.py", line 3040, in _algebraic_without_suffix
+    assert piece_type, f"san() and lan() expect move to be legal or null, but got {move} in {self.fen()}"
+           ^^^^^^^^^^
+AssertionError: san() and lan() expect move to be legal or null, but got f2f4 in rnbqkbnr/pppppppp/8/8/5P2/8/PPPPP1PP/RNBQKBNR b KQkq - 0 1
+
+----------------------------------------

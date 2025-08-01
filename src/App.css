@@ -1,0 +1,469 @@
+/* src/App.css */
+body {
+  margin: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f0f2f5;
+  color: #333;
+}
+
+/* Base styles for the overall app background */
+html, body, #root {
+  height: 100%;
+  width: 100vw;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  background: none;
+  overflow-x: hidden;
+  overflow-y: auto; /* Allow scrolling on the body if content overflows */
+}
+
+.app-bg {
+  min-height: 100vh;
+  min-width: 100vw;
+  width: 100vw;
+  height: 100vh;
+  background: linear-gradient(135deg, #232526 0%, #414345 100%);
+  font-family: 'Segoe UI', 'Roboto', 'Arial', sans-serif;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
+}
+
+.encrypt-bg, .decrypt-bg {
+  background: #111112 !important;
+  min-height: calc(100vh - 80px); /* Account for navbar height */
+  width: 100vw;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding-top: 2rem;
+}
+
+/* Navbar styles */
+.navbar {
+  width: 100vw;
+  box-sizing: border-box;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(30, 30, 40, 0.98);
+  color: #fff;
+  padding: 0.75rem 2rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.navbar-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  display: flex;
+  align-items: center;
+}
+
+.brand {
+  color: #f7c873;
+  font-family: 'Playfair Display', serif;
+  font-size: 1.6em;
+  margin-left: 0.4em;
+  letter-spacing: 2px;
+}
+
+.navbar-links {
+  display: flex;
+  gap: 1.5rem;
+}
+
+.nav-link {
+  color: #f7c873;
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 1.1em;
+  transition: color 0.2s;
+}
+.nav-link:hover {
+  color: #fffbe7;
+}
+
+/* Landing page styles */
+.landing-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: calc(100vh - 80px);
+  width: 100vw;
+  text-align: center;
+  flex: 1;
+  overflow-x: hidden;
+}
+
+.landing-title {
+  font-size: 2.8rem;
+  font-family: 'Playfair Display', serif;
+  color: #fffbe7;
+  margin-top: 2.5rem;
+  margin-bottom: 0.5rem;
+  letter-spacing: 2px;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.12);
+}
+
+.landing-subtitle {
+  font-size: 1.3rem;
+  color: #f7c873;
+  margin-bottom: 2.5rem;
+  font-weight: 400;
+}
+
+.landing-actions {
+  display: flex;
+  gap: 2rem;
+  margin-bottom: 2.5rem;
+  justify-content: center;
+}
+
+.landing-info {
+  background: rgba(255,255,255,0.07);
+  border-radius: 1rem;
+  padding: 2rem 2.5rem;
+  color: #fff;
+  margin: 0 auto;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.08);
+  width: 100%;
+  max-width: 480px;
+  min-width: 0;
+}
+.landing-info h2 {
+  color: #f7c873;
+  font-size: 1.3rem;
+  margin-bottom: 1rem;
+}
+.landing-info ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.landing-info li {
+  font-size: 1.1rem;
+  margin-bottom: 0.7rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+}
+
+/* Main content area for Encrypt/Decrypt apps - Two Column Layout */
+.main-content.two-col-layout {
+  display: flex;
+  flex-direction: row; /* Default to row for wider screens */
+  align-items: flex-start; /* Align items to the top */
+  gap: 2.5rem; /* Gap between columns */
+  width: 100%;
+  max-width: 1200px; /* Max width for the whole content area */
+  padding: 2rem 1rem 3rem 1rem;
+  box-sizing: border-box;
+  margin: 2.5rem auto 0 auto; /* Center the layout horizontally */
+  min-height: calc(100vh - 80px - 4rem); /* Ensure it takes up enough space, minus navbar and padding */
+}
+
+.left-col.board-wrapper {
+  flex: 1; /* Allow board column to grow */
+  display: flex;
+  justify-content: center; /* Center the board horizontally */
+  align-items: center; /* Center the board vertically if it's smaller */
+  min-width: 320px; /* Minimum width for the board column */
+  max-width: 650px; /* Maximum width to prevent board from getting too large */
+}
+
+.right-col.message-history-wrapper {
+  flex: 0 0 350px; /* Fixed width for the right column, prevents shrinking/growing */
+  display: flex;
+  flex-direction: column; /* Stack items vertically in the right column */
+  gap: 1.5rem; /* Reduced gap between history and message cards for more space */
+  min-width: 300px; /* Minimum width for readability on smaller screens */
+  max-width: 400px; /* Max width to keep content compact */
+}
+
+/* Card base styles */
+.card {
+  background: rgba(255,255,255,0.10);
+  border-radius: 1.2rem;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.10);
+  padding: 2rem 2.5rem;
+  color: #fff;
+  width: 100%; /* Take full width of its parent column */
+  box-sizing: border-box;
+}
+
+.card h3 {
+  color: #f7c873;
+  font-size: 1.5rem;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.card.encrypt-card, .card.decrypt-card {
+  background: #18181b !important;
+  color: #fff;
+  border: 1.5px solid #232526;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.18);
+}
+
+.board-card {
+  padding: 1.2rem 1.2rem 1.5rem 1.2rem;
+  background: rgba(34, 34, 40, 0.98);
+  color: #f7c873;
+  border-radius: 1.2rem;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.13);
+  border: 1.5px solid #f7c873;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%; /* Important: makes the card take up available width in left-col */
+  max-width: 600px; /* Matches boardWidth, ensures card doesn't exceed board size */
+}
+
+/* Chessboard size adjustment for the "complete big board" look */
+.react-chessboard-board {
+  width: 100% !important; /* Forces the board to fill its parent .board-card */
+  max-width: 600px; /* Matches boardWidth in JS */
+  height: auto;
+}
+
+.move-history-card {
+  background: rgba(34, 34, 40, 0.98);
+  color: #f7c873;
+  border-radius: 1.2rem;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.13);
+  padding: 1.5rem 1.2rem;
+  border: 1.5px solid #f7c873;
+}
+.move-history-card h3 {
+  color: #f7c873;
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  letter-spacing: 0.5px;
+}
+.pgn-list {
+  background: transparent;
+  border: none;
+  color: #f7c873;
+  font-size: 1.08em;
+  list-style: decimal inside;
+  max-height: 200px; /* Reduced max-height for no-scroll */
+  min-height: 60px;
+  overflow-y: auto; /* Keep auto scroll just in case, but aim to avoid it */
+  padding: 0 0.5em;
+  margin-top: 0;
+}
+.pgn-list li {
+  padding: 4px 0 4px 0.5em;
+  border-bottom: 1px solid #3a3a3a;
+}
+.pgn-list li:last-child {
+  border-bottom: none;
+}
+
+/* Input and Button Styles */
+.input {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #dcdcdc;
+  border-radius: 8px;
+  box-sizing: border-box;
+  font-size: 1rem;
+}
+
+.input.message {
+  min-height: 3.5em;
+  border: none;
+  padding: 1em;
+  font-size: 1.1em;
+  margin-bottom: 1.2em;
+  background: rgba(255,255,255,0.15);
+  color: #f7c873;
+  resize: vertical;
+}
+.input.message:disabled {
+  background: #eee;
+  color: #aaa;
+}
+
+.button {
+  padding: 0.7em 2em;
+  border-radius: 2em;
+  border: none;
+  font-size: 1.1em;
+  font-weight: 600;
+  cursor: pointer;
+  margin: 0 0.5em;
+  transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  display: inline-flex; /* Changed to inline-flex for better centering/spacing */
+  justify-content: center;
+  align-items: center;
+  text-decoration: none; /* For download link */
+}
+.button.primary {
+  background: linear-gradient(90deg, #f7c873 0%, #f7b42c 100%);
+  color: #232526;
+}
+.button.primary:hover {
+  background: linear-gradient(90deg, #ffe7b2 0%, #f7c873 100%);
+  color: #232526;
+}
+.button.secondary {
+  background: #232526;
+  color: #f7c873;
+  border: 2px solid #f7c873;
+}
+.button.secondary:hover {
+  background: #f7c873;
+  color: #232526;
+}
+
+/* File Input Button Styling */
+.input-file-hidden {
+  display: none; /* Hide the default file input */
+}
+
+.input-file-label {
+  /* Inherit button primary styles */
+  background: linear-gradient(90deg, #f7c873 0%, #f7b42c 100%);
+  color: #232526;
+  padding: 0.7em 2em;
+  border-radius: 2em;
+  font-size: 1.1em;
+  font-weight: 600;
+  cursor: pointer;
+  margin: 1.2em 0.5em; /* Adjusted margin to match other inputs/buttons */
+  transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  display: inline-flex; /* Make it behave like a block-level button */
+  width: calc(100% - 1em); /* Adjust width to account for side margins */
+  box-sizing: border-box; /* Include padding and border in element's total width and height */
+  justify-content: center; /* Center text within the button */
+  text-align: center;
+  white-space: nowrap; /* Prevent text wrap if file name is long */
+  overflow: hidden; /* Hide overflow text */
+  text-overflow: ellipsis; /* Add ellipsis for overflow text */
+}
+
+.input-file-label:hover {
+  background: linear-gradient(90deg, #ffe7b2 0%, #f7c873 100%);
+  color: #232526;
+}
+
+
+/* Alert and Info Boxes */
+.alert {
+  padding: 1em 1.5em;
+  border-radius: 0.7em;
+  margin-bottom: 1em;
+  font-size: 1.1em;
+  font-weight: 500;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+.alert-error {
+  background: #2d0909;
+  color: #ffb3b3;
+  border-left: 5px solid #c62828;
+}
+.alert-success {
+  background: #0e2d1a;
+  color: #b6ffb3;
+  border-left: 5px solid #2e7d32;
+}
+
+.info {
+  background: #18181b;
+  border-radius: 0.7em;
+  padding: 1.2em 1.5em;
+  color: #f7c873;
+  margin-top: 1.2em;
+  font-size: 1.1em;
+  border: 1.5px solid #232526;
+}
+
+.plaintext-output {
+  background: #111112;
+  color: #f7c873;
+  padding: 1em;
+  border-radius: 0.7em;
+  font-size: 1.1em;
+  margin-top: 0.7em;
+  word-break: break-word;
+  border: 1.5px solid #232526;
+}
+
+/* Helper classes */
+.mt-4 { margin-top: 1rem; }
+/* Removed .scroll-section to ensure no forced scrolling on the card itself */
+
+
+/* Responsive Adjustments */
+@media (max-width: 1024px) { /* Adjust breakpoint for two-column layout */
+  .main-content.two-col-layout {
+      flex-direction: column; /* Stack columns vertically on smaller screens */
+      align-items: center; /* Center items when stacked */
+      gap: 2rem; /* Adjust gap for stacked items */
+      padding: 1.5rem 0.5rem;
+      min-height: auto; /* Allow height to auto-adjust */
+  }
+
+  .left-col.board-wrapper {
+      width: 100%;
+      max-width: 600px; /* Keep max-width for board */
+  }
+
+  .right-col.message-history-wrapper {
+      width: 100%;
+      max-width: 600px; /* Allow right column to take more width when stacked */
+      min-width: unset;
+  }
+
+  .card {
+      padding: 1.5rem 1rem; /* Adjust card padding for smaller screens */
+      width: 95%; /* Adjust width for better fit on small screens */
+      margin: 0 auto; /* Center cards */
+  }
+  .board-card {
+      width: 100%; /* Make board card full width of its container */
+      max-width: 600px; /* Keep max-width */
+  }
+  .move-history-card, .encrypt-card, .decrypt-card {
+      width: 100%; /* Make other cards full width of their container */
+  }
+
+  .pgn-list {
+      max-height: 180px; /* Adjust history height for smaller screens, balance with message area */
+  }
+}
+
+@media (max-width: 650px) { /* Further adjustments for very small screens */
+  .board-card {
+      padding: 0.8rem; /* Smaller padding for very small screens */
+  }
+  .react-chessboard-board {
+      width: 100% !important;
+      max-width: 320px; /* Smaller max-width for very small screens */
+  }
+  .card h3 {
+      font-size: 1.3rem; /* Smaller headings */
+  }
+  .move-history-card, .encrypt-card, .decrypt-card {
+      padding: 1rem; /* Smaller padding */
+  }
+  .input-file-label {
+      font-size: 1em; /* Smaller font size for file button on small screens */
+      padding: 0.7em 1.5em;
+  }
+  .input.message, .button {
+      font-size: 1em;
+  }
+}

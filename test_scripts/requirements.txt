@@ -1,0 +1,19 @@
+# Core dependencies for ChessPerm testing
+chess>=1.11.0
+numpy>=1.24.0
+scipy>=1.10.0
+cryptography>=3.4.0
+
+# Optional dependencies for advanced testing
+psutil>=5.9.0  # For memory usage testing
+
+# For statistical analysis
+statistics  # Built-in in Python 3.4+
+
+# For randomness testing (external tools)
+# dieharder - install via package manager
+# niststs - install via package manager
+# hashcat - install via package manager
+
+# For GPU acceleration testing
+# pyhashcat - install separately if needed 
