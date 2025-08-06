@@ -1,105 +1,127 @@
-# Chess-based Encryption
+# Chess-Based Encryption
 
-A full-stack, post-quantum secure message encryption and decryption tool with steganography, built with a React/Vite frontend and a FastAPI Python backend.
+A full-stack, post-quantum secure encryption and decryption system combining chess-based key derivation, post-quantum cryptography, symmetric encryption, and steganography. Built with a React/Vite frontend and a FastAPI backend in Python.
 
 ---
 
 ## Features
 
-- **Post-Quantum Security**: Uses Kyber512 KEM (via liboqs-python) for key encapsulation.
-- **Chess-Based Key Derivation**: Derives keys from chessboard permutations (ChessPerm).
-- **Symmetric Encryption**: XChaCha20-Poly1305 for authenticated encryption.
-- **Steganography**: Hide encrypted data inside images.
-- **Modern UI**: Responsive, user-friendly React interface.
+- **Post-Quantum Security**  
+  Utilizes Kyber512 KEM (via `liboqs-python`) for secure key encapsulation, ensuring resistance against quantum adversaries.
+
+- **Chess-Based Key Derivation (ChessPerm)**  
+  Generates high-entropy keys based on user-supplied chessboard permutations.
+
+- **Authenticated Symmetric Encryption**  
+  Uses XChaCha20-Poly1305 for fast and secure encryption with message authentication.
+
+- **Steganography**  
+  Embeds encrypted payloads into image files using LSB (Least Significant Bit) encoding techniques.
+
+- **Modern User Interface**  
+  A responsive and user-friendly frontend for seamless encryption and decryption workflows.
 
 ---
 
 ## Cryptographic Workflow
 
-### 1. **Key Derivation (ChessPerm)**
-- Users input a chessboard permutation (e.g., FEN string or drag-and-drop board).
-- This permutation is deterministically mapped to a symmetric key.
+1. **Key Derivation (ChessPerm)**  
+   Users input a sequence of chess moves or board states. These are deterministically transformed into a symmetric key.
 
-### 2. **Key Encapsulation (Kyber512 KEM)**
-- The backend uses Kyber512 (via [liboqs-python](https://github.com/open-quantum-safe/liboqs-python)) to generate a public/private keypair.
-- The frontend receives the public key and encapsulates a shared secret.
-- The shared secret is used as the symmetric key for encryption.
+2. **Key Encapsulation (Kyber512 KEM)**  
+   The backend generates a Kyber512 public/private key pair.  
+   The frontend uses the public key to encapsulate a shared secret.  
+   This shared secret is used to derive the symmetric encryption key.
 
-### 3. **Symmetric Encryption (XChaCha20-Poly1305)**
-- The message is encrypted using XChaCha20 for confidentiality and Poly1305 for authentication.
-- The ciphertext, nonce, and MAC are bundled together.
+3. **Symmetric Encryption (XChaCha20-Poly1305)**  
+   The user’s message is encrypted using XChaCha20 for confidentiality, with authentication provided by Poly1305.  
+   The ciphertext, nonce, and MAC tag are bundled into a secure payload.
 
-### 4. **Steganography**
-- The encrypted data is embedded into a user-supplied image (PNG) using LSB or similar techniques.
-- The stego image is returned to the user for download or sharing.
+4. **Steganographic Embedding**  
+   The encrypted payload is embedded into a user-provided PNG image using LSB steganography.  
+   The final stego image is returned to the user for download or transmission.
 
-### 5. **Decryption**
-- The process is reversed: the backend extracts the encrypted data from the image, decapsulates the key, and decrypts the message.
+5. **Decryption Process**  
+   During decryption, the encrypted payload is extracted from the image.  
+   The Kyber private key is used to decapsulate the shared secret, which is then used to decrypt and verify the original message.
 
 ---
 
 ## Project Structure
 
-```
-prototpyeFinal/
-  README.md
-  backend/           # FastAPI backend (Python)
-  frontend/          # React/Vite frontend (JavaScript/TypeScript)
-  liboqs/            # (Submodule or source) for post-quantum crypto
-```
+prototypeFinal/
+├── README.md
+├── backend/ # FastAPI backend (Python)
+├── frontend/ # React + Vite frontend (TypeScript)
+└── liboqs/ # Kyber post-quantum cryptography library (submodule or source)
+
+markdown
+Copy
+Edit
 
 ---
 
 ## Setup Instructions
 
-### 1. **Backend (Python/FastAPI)**
+### 1. Backend (Python / FastAPI)
 
-- **Requirements**: Python 3.9+, `liboqs-python`, `fastapi`, `uvicorn`, `pillow`, `cryptography`, `python-multipart`
-- **Install dependencies:**
-  ```sh
-  cd backend
-  pip install -r requirements.txt
-  ```
-- **Run the backend:**
-  ```sh
-  uvicorn main:app --reload
-  ```
-  (Or, from project root: `uvicorn backend.main:app --reload`)
+**Requirements**:  
+- Python 3.9+  
+- `liboqs-python`, `fastapi`, `uvicorn`, `pillow`, `cryptography`, `python-multipart`
 
-### 2. **Frontend (React/Vite)**
+**Steps**:
+```bash
+cd backend
+pip install -r requirements.txt
+uvicorn main:app --reload
+Or run from the project root:
 
-- **Requirements**: Node.js 18+, npm
-- **Install dependencies:**
-  ```sh
-  cd frontend
-  npm install
-  ```
-- **Run the frontend:**
-  ```sh
-  npm run dev
-  ```
-- The frontend will be available at [http://localhost:5173](http://localhost:5173) (default Vite port).
+bash
+Copy
+Edit
+uvicorn backend.main:app --reload
+2. Frontend (React / Vite)
+Requirements:
 
-### 3. **Configuration**
-- Ensure the frontend API base URL matches the backend port (default: 8000).
-- CORS is enabled in the backend for local development.
+Node.js 18+
+
+npm
+
+Steps:
+
+bash
+Copy
+Edit
+cd frontend
+npm install
+npm run dev
+Access the frontend at http://localhost:5173 (default Vite port).
+
+3. Configuration
+Ensure the frontend API base URL matches the backend port (default: http://localhost:8000)
+
+CORS is enabled in the backend for development use
+
+Security Considerations
+No plaintext keys or messages are stored at any point.
+
+All cryptographic operations use secure, vetted libraries.
+
+Steganography is intended for obfuscation, not cryptographic protection.
+
+Acknowledgments
+This project uses and builds upon:
+
+liboqs-python
+
+FastAPI
+
+React
+
+Vite
+
+yaml
+Copy
+Edit
 
 ---
-
-## Security Notes
-- **No plaintext keys or messages are stored.**
-- **All cryptography is performed using vetted libraries.**
-- **Steganography is for obfuscation, not security.**
-
----
-
-## Credits
-- [liboqs-python](https://github.com/open-quantum-safe/liboqs-python)
-- [FastAPI](https://fastapi.tiangolo.com/)
-- [React](https://react.dev/)
-- [Vite](https://vitejs.dev/)
-
----
-
-## License
-MIT 
