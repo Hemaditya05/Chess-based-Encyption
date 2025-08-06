@@ -55,9 +55,6 @@ prototypeFinal/
 ├── frontend/ # React + Vite frontend (TypeScript)
 └── liboqs/ # Kyber post-quantum cryptography library (submodule or source)
 
-markdown
-Copy
-Edit
 
 ---
 
@@ -74,12 +71,11 @@ Edit
 cd backend
 pip install -r requirements.txt
 uvicorn main:app --reload
+
 Or run from the project root:
 
-bash
-Copy
-Edit
 uvicorn backend.main:app --reload
+
 2. Frontend (React / Vite)
 Requirements:
 
@@ -88,14 +84,10 @@ Node.js 18+
 npm
 
 Steps:
-
-bash
-Copy
-Edit
 cd frontend
 npm install
 npm run dev
-Access the frontend at http://localhost:5173 (default Vite port).
+Access the frontend at http://localhost:5173 (default Vite)
 
 3. Configuration
 Ensure the frontend API base URL matches the backend port (default: http://localhost:8000)
@@ -120,8 +112,6 @@ React
 
 Vite
 
-yaml
-Copy
-Edit
-
 ---
+
+
