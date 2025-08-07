@@ -1,4 +1,4 @@
-Here is your **fully professional `README.md`** file written in clean Markdown with no emojis, ready for direct use:
+ 
 
 
 # Chess-Based Encryption
@@ -133,4 +133,5 @@ This project builds upon the following open-source tools and libraries:
 ## License
 
 This project is licensed under the MIT License.
+
 
